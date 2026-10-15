@@ -1,0 +1,414 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Safety Legends</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1628;--panel:#0f1f38;--card:#152847;--border:#1e3a5f;--ink:#e4edf8;--mute:#7a9bc0;--acc:#38bdf8;--acc2:#0ea5e9;--ok:#22c55e;--bad:#ef4444;--gold:#fbbf24;--glow:rgba(56,189,248,.15)}
+*{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:Inter,'Segoe UI',sans-serif}
+#app{display:flex;height:100%}
+
+/* 3D Stage */
+#stage{flex:1;min-width:0;position:relative;touch-action:none;
+  background:linear-gradient(180deg,#0a1225 0%,#0d1a30 40%,#111f3a 100%)}
+#stage canvas{display:block;width:100%;height:100%}
+#loader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(8,16,32,.85);color:#fff;font-family:Orbitron;font-size:1.1rem;font-weight:700;z-index:5;gap:14px;letter-spacing:1px}
+#loader .bar{width:220px;height:6px;background:rgba(255,255,255,.1);border-radius:8px;overflow:hidden}
+#loader .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:8px;width:0%;transition:width .3s}
+
+/* Side Panel */
+#panel{width:440px;max-width:50%;overflow-y:auto;background:var(--panel);border-left:2px solid var(--border);padding:24px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+#panel::-webkit-scrollbar{width:6px}
+#panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+@media(max-width:760px){
+  #app{flex-direction:column}
+  #stage{flex:none;height:36%}
+  #panel{width:auto;max-width:none;flex:1;border-left:0;border-top:2px solid var(--border);overflow-y:auto}
+}
+
+/* Typography */
+.brand{font-family:Orbitron;font-weight:900;letter-spacing:2px}
+h1{font-family:Orbitron;font-size:2rem;font-weight:900;letter-spacing:2px;margin:0 0 4px;line-height:1.15;
+  background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h2{font-size:1.15rem;font-weight:700;margin:0 0 8px;color:var(--ink)}
+.sub{font-family:Orbitron;font-size:.7rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--acc);margin-bottom:14px}
+p{margin:6px 0 12px;line-height:1.5;color:var(--mute);font-size:.95rem}
+small{color:var(--mute);font-size:.85rem}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 16px}
+.chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:600;color:var(--mute);letter-spacing:.5px}
+
+/* Cards & inputs */
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:16px}
+.login-card h3{font-family:Orbitron;font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-bottom:14px}
+label{font-size:.85rem;font-weight:600;color:var(--ink);display:block;margin-bottom:4px;margin-top:12px}
+label:first-of-type{margin-top:0}
+.inp{font:inherit;font-size:.95rem;font-weight:500;color:var(--ink);background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:10px 14px;width:100%;outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--glow)}
+.inp::placeholder{color:var(--mute);font-weight:400}
+
+/* Buttons */
+.btn{font:inherit;font-weight:700;font-size:.95rem;color:#fff;background:linear-gradient(135deg,var(--acc2),var(--acc));border:none;border-radius:12px;padding:12px 18px;cursor:pointer;width:100%;margin-top:10px;text-align:center;letter-spacing:.5px;transition:transform .1s,opacity .15s;position:relative;overflow:hidden}
+.btn:hover{opacity:.9}.btn:active{transform:scale(.97)}
+.btn:focus-visible,.it:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.btn.sec{background:var(--card);border:2px solid var(--border);color:var(--mute)}
+.btn.sec:hover{border-color:var(--acc);color:var(--ink)}
+.btn.danger{background:linear-gradient(135deg,#dc2626,#ef4444)}
+
+/* Role cards */
+.role-card{display:flex;gap:14px;align-items:center;background:var(--card);border:2px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;width:100%;margin-top:8px;text-align:left;transition:border-color .2s,transform .1s;font:inherit;color:var(--ink)}
+.role-card:hover{border-color:var(--acc);transform:translateY(-1px)}
+.role-card:active{transform:translateY(1px)}
+.role-card .icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.role-card b{font-size:1rem;display:block;margin-bottom:2px}
+
+/* HUD */
+.hud{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 14px;margin-bottom:12px;font-weight:600;font-size:.9rem}
+.hud .hearts{letter-spacing:2px}
+.hud .score{color:var(--gold);font-family:Orbitron;font-size:.85rem}
+.player-bar{font-size:.8rem;color:var(--mute);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.player-bar .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex-shrink:0}
+
+/* PPE grid */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+.it{font:inherit;font-size:.9rem;font-weight:600;color:var(--ink);background:var(--card);border:2px solid var(--border);border-radius:12px;padding:10px;cursor:pointer;display:flex;gap:8px;align-items:center;transition:all .15s}
+.it:hover{border-color:var(--acc)}
+.it.on{background:rgba(56,189,248,.15);border-color:var(--acc);color:#fff;box-shadow:0 0 12px var(--glow)}
+.it .e{font-size:1.3rem}
+
+/* Tags */
+.tag{display:inline-block;background:var(--acc);color:var(--bg);border-radius:8px;padding:3px 10px;font-weight:700;font-size:.75rem;letter-spacing:.5px;text-transform:uppercase}
+
+/* Hazard / scenario */
+.hz-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--bad);border-radius:8px;padding:4px 10px;font-weight:700;font-size:.75rem;letter-spacing:.5px;text-transform:uppercase}
+.opt-btn{font:inherit;font-weight:600;font-size:.9rem;color:var(--ink);background:var(--card);border:2px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;width:100%;margin-top:8px;text-align:left;transition:border-color .15s,transform .1s}
+.opt-btn:hover{border-color:var(--acc)}
+.opt-btn:active{transform:scale(.98)}
+
+/* Feedback */
+.good{color:var(--ok)}.badc{color:var(--bad)}
+.msg{background:rgba(56,189,248,.08);border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:12px;font-size:.9rem;color:var(--mute)}
+.msg b{color:var(--ink)}
+
+/* End screen */
+.end-badge{display:inline-block;background:linear-gradient(135deg,var(--acc2),var(--acc));color:var(--bg);border-radius:12px;padding:8px 20px;font-weight:700;font-size:.95rem;margin:8px 0}
+.big{font-size:3.5rem;margin:0;line-height:1}
+.final-score{font-family:Orbitron;font-size:2rem;font-weight:900;color:var(--gold);margin:8px 0}
+
+/* Shield logo */
+.shield{width:70px;height:80px;margin:0 auto 12px;position:relative;display:flex;align-items:center;justify-content:center}
+.shield svg{width:100%;height:100%}
+.shield-text{position:absolute;font-family:Orbitron;font-weight:900;font-size:1.3rem;color:var(--bg);text-shadow:0 1px 2px rgba(0,0,0,.3)}
+
+@media(prefers-reduced-motion:reduce){.btn,.it,.role-card,.opt-btn{transition:none}}
+</style></head><body>
+<div id="app">
+  <div id="stage">
+    <div id="loader">
+      <div>LOADING MODEL</div>
+      <div class="bar"><span id="pbar"></span></div>
+    </div>
+  </div>
+  <div id="panel" aria-live="polite"></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ══════════════════════════════════════
+   GAME DATA — 5 ROLES
+   ══════════════════════════════════════ */
+const ITEMS={hat:['⛑️','Hard Hat'],glasses:['🥽','Safety Glasses'],gloves:['🧤','Gloves'],boots:['🥾','Safety Boots'],ear:['🎧','Ear Muffs'],mask:['😷','Face Mask'],apron:['🥼','Apron'],vest:['🦺','Hi-Vis Vest'],belt:['🏋️','Back Belt'],flip:['🩴','Flip-Flops']};
+
+const ROLES={
+fems:{n:'FEMS Technician',e:'🔧',c:0x2563eb,bg:'#1e3a8a',
+  d:'Carry out fire and electrical maintenance across the facility. Inspect panels, test alarms and repair wiring.',
+  need:['hat','glasses','gloves','boots','ear'],
+  sc:[
+    ['spark','The electrical panel you must service is still energised. You see exposed terminals.',['Isolate the power using lock-out/tag-out, verify it is dead, then begin work','Wear gloves and work quickly while it is live','Ask a colleague to hold tools near the terminals'],'Always isolate power with lock-out/tag-out before touching electrics.'],
+    ['noise','You enter the chiller plant room. The compressors are extremely loud — a sign reads "Hearing Protection Zone".',['Keep ear muffs on and limit time inside','Remove ear muffs to hear abnormal sounds better','Rush through with no protection, it is only a minute'],'Loud noise causes permanent hearing damage. Protection stays on in noise zones.'],
+    ['boxes','Your access ladder has a cracked rung and wobbles when you climb.',['Tag it as defective, report it and get a safe replacement','Wedge cardboard under the leg to stabilise it','Climb carefully and hold on tight'],'Damaged equipment must be removed from service and reported.'],
+    ['spill','Hydraulic oil has leaked across the floor near the fire pump you need to inspect.',['Cordon off the area, report the spill and have it cleaned before starting','Lay newspaper over it and continue','Step around it carefully'],'Slip hazards must be cleaned up and signed before work begins.']]},
+
+cleaner:{n:'Cleaner',e:'🧹',c:0x0d9488,bg:'#134e4a',
+  d:'Clean wards, corridors and public areas. Handle chemicals and clinical waste safely.',
+  need:['gloves','mask','apron','boots','glasses'],
+  sc:[
+    ['spill','You are mopping a busy hospital corridor during visiting hours.',['Place wet-floor signs on both sides and mop one lane at a time','Mop as fast as possible before visitors notice','Leave it to dry on its own'],'Warning signs and keeping a dry walking path prevents slips and falls.'],
+    ['bio','You find a used syringe needle on the floor next to a waste bin.',['Do not touch it. Guard the area and call the nurse in charge immediately','Pick it up carefully with gloves and drop it in the bin','Kick it under the bed out of sight'],'Sharps are handled only by trained staff using the sharps disposal procedure.'],
+    ['bio','You need to clean a stubborn stain. You have bleach and an acid-based cleaner.',['Never mix chemicals. Use one product as directed, with ventilation','Mix them together for extra cleaning power','Test a small mixed amount first'],'Mixing chemicals can release toxic gas. Always follow the product label.'],
+    ['bio','A room has an "Isolation — Infection Risk" sign on the door.',['Read the sign, put on the extra PPE listed and check with the nurse','Enter normally — your standard gloves are enough','Ignore the sign, it is probably outdated'],'Isolation signs require extra PPE and procedures. Always follow them.']]},
+
+bems:{n:'BEMS Engineer',e:'💻',c:0x7c3aed,bg:'#4c1d95',
+  d:'Monitor and maintain the Building Energy Management System, HVAC controls and plant equipment.',
+  need:['boots','glasses','gloves','hat','vest'],
+  sc:[
+    ['spark','A BMS controller on the roof is showing a fault. The access hatch is on a flat roof with no edge protection.',['Set up a temporary barrier or use a harness and anchor before approaching the edge','Walk carefully to the edge and lean over to check','Ignore the fault and reset the controller remotely'],'Working at height requires edge protection or a harness — even on flat roofs.'],
+    ['noise','The AHU room has running fans. You need to check a sensor inside a duct opening.',['Ensure the fan is isolated before reaching into the duct','Reach in quickly while the fan is running','Ask someone to watch while you put your hand in'],'Moving parts must be isolated before any hands-on work. Never reach into running machinery.'],
+    ['boxes','Heavy UPS battery packs need moving from the loading bay to the server room.',['Use a trolley and get a colleague to help, wear back belt','Carry them one at a time on your own','Drag them across the floor'],'Heavy loads need mechanical aids and team lifts to prevent back injuries.'],
+    ['spill','Refrigerant is leaking from a chiller unit. You can smell a chemical odour.',['Evacuate the area, ventilate if safe and call a specialist refrigerant engineer','Tighten the fitting yourself','Ignore the smell, it will dissipate'],'Refrigerant leaks require specialist handling. Evacuate and report immediately.']]},
+
+lorry:{n:'Lorry Driver',e:'🚛',c:0xd97706,bg:'#78350f',
+  d:'Deliver and collect supplies, equipment and waste across multiple sites. Manage vehicle safety checks.',
+  need:['boots','vest','gloves','belt'],
+  sc:[
+    ['boxes','Your delivery load has shifted during transit. Several heavy boxes are leaning against the rear door.',['Open the door slowly from the side, use a colleague as a spotter','Swing the door open quickly and jump back','Leave the load and drive to the next stop'],'Shifted loads are dangerous. Open doors carefully with a spotter to avoid being struck.'],
+    ['spill','It has been raining and the loading bay ramp is wet and slippery.',['Put on safety boots, walk slowly and request anti-slip mats','Run down the ramp to get the job done faster','Wear flip-flops — they dry faster'],'Wet ramps cause serious falls. Proper footwear and anti-slip measures are essential.'],
+    ['noise','You need to reverse your lorry in a tight yard with limited visibility.',['Use a banksman or get out and check behind before reversing','Reverse slowly using mirrors only','Reverse quickly to get it over with'],'Always use a banksman or physically check behind before reversing in tight areas.'],
+    ['spark','During your vehicle walk-around check, you notice a frayed electrical cable near the battery.',['Report it, tag the vehicle as defective and do not drive it','Wrap it in tape and carry on','Ignore it — the vehicle starts fine'],'Defective vehicles must be reported and taken out of service until repaired.']]},
+
+mechanic:{n:'Mechanic',e:'🔩',c:0xdc2626,bg:'#7f1d1d',
+  d:'Service and repair plant equipment, vehicles, generators and mechanical systems.',
+  need:['hat','glasses','gloves','boots','ear'],
+  sc:[
+    ['spark','You need to weld a bracket on a generator frame. Nearby there are oily rags and a fuel can.',['Move all flammable materials at least 10 metres away, set up fire blankets and have an extinguisher ready','Weld quickly before anything catches fire','Cover the fuel can with a cloth'],'Hot work requires a clear zone free of flammables, with fire-fighting equipment to hand.'],
+    ['boxes','A ceiling-mounted ventilation fan needs a belt replacement. It is 4 metres up.',['Erect scaffolding or use a MEWP, lock out the fan before climbing','Stand on stacked pallets to reach it','Ask a colleague to hold the ladder while you lean out'],'Work at height needs a stable platform and the machinery must be locked out first.'],
+    ['bio','You are draining used engine oil from a generator. The drain container is almost full.',['Stop draining, seal the container, label it and arrange proper disposal','Let it overflow onto the floor and clean up later','Pour the excess into a nearby drain'],'Used oil is hazardous waste. Contain it, label it and never pour it down a drain.'],
+    ['noise','You are using an angle grinder to cut a metal bracket. Sparks are flying.',['Wear safety glasses, ear muffs, gloves and ensure a fire watch is in place','Squint and turn your head away from the sparks','Only wear gloves — the sparks are small'],'Grinding requires full PPE — eye, hearing and hand protection — plus a fire watch.']]}
+};
+
+/* ══════════════════════════════════════
+   THREE.JS SCENE (dark cinematic)
+   ══════════════════════════════════════ */
+const stageEl=document.getElementById('stage'),P=document.getElementById('panel');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+renderer.setClearColor(0x0a1225);
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;
+stageEl.appendChild(renderer.domElement);
+
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x0a1225,.04);
+
+const cam=new THREE.PerspectiveCamera(35,1,.1,80);
+cam.position.set(0,1.8,5);cam.lookAt(0,1,0);
+
+const controls=new OrbitControls(cam,renderer.domElement);
+controls.enableDamping=true;controls.dampingFactor=.08;
+controls.enablePan=false;controls.enableZoom=true;
+controls.minDistance=3;controls.maxDistance=12;
+controls.target.set(0,1,0);controls.update();
+
+/* Dark cinematic lighting */
+scene.add(new THREE.AmbientLight(0x1a2a44,.4));
+scene.add(new THREE.HemisphereLight(0x1e3a5f,0x0a1225,.3));
+const sun=new THREE.DirectionalLight(0x38bdf8,.8);
+sun.position.set(4,8,5);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);
+sun.shadow.camera.left=-5;sun.shadow.camera.right=5;
+sun.shadow.camera.top=5;sun.shadow.camera.bottom=-2;
+sun.shadow.bias=-.001;scene.add(sun);
+const rim=new THREE.DirectionalLight(0x818cf8,.25);
+rim.position.set(-3,3,-4);scene.add(rim);
+const fill=new THREE.PointLight(0x38bdf8,.3,10);
+fill.position.set(0,2,3);scene.add(fill);
+
+const toon=c=>new THREE.MeshToonMaterial({color:c});
+
+/* Ground — dark platform */
+const gf=new THREE.Mesh(new THREE.CylinderGeometry(3.5,3.5,.15,48),toon(0x1e293b));
+gf.receiveShadow=true;gf.position.y=-.075;scene.add(gf);
+/* Glowing ring */
+const ring=new THREE.Mesh(new THREE.TorusGeometry(3.5,.02,8,64),new THREE.MeshBasicMaterial({color:0x38bdf8,transparent:true,opacity:.4}));
+ring.rotation.x=Math.PI/2;ring.position.y=0;scene.add(ring);
+/* Grid lines */
+for(let i=0;i<8;i++){
+  const line=new THREE.Mesh(new THREE.TorusGeometry(0.5+i*0.4,.005,4,48),new THREE.MeshBasicMaterial({color:0x1e3a5f,transparent:true,opacity:.2}));
+  line.rotation.x=Math.PI/2;line.position.y=0.01;scene.add(line);
+}
+
+/* ══════════════════════════════════════
+   LOAD 3D MODEL
+   ══════════════════════════════════════ */
+const heroGroup=new THREE.Group();scene.add(heroGroup);
+let mixer=null,model=null;
+const PPE={};
+const MODEL_URL='./character.glb';
+
+function loadModel(){
+  return new Promise((resolve)=>{
+    const loader=new GLTFLoader();
+    loader.load(MODEL_URL,
+      gltf=>{
+        model=gltf.scene;
+        const box=new THREE.Box3().setFromObject(model);
+        const size=box.getSize(new THREE.Vector3());
+        const center=box.getCenter(new THREE.Vector3());
+        const scale=1.8/size.y;
+        model.scale.setScalar(scale);
+        model.position.y=-center.y*scale;
+        model.position.x=-center.x*scale;
+        model.position.z=-center.z*scale;
+        model.traverse(child=>{
+          if(child.isMesh){child.castShadow=true;child.receiveShadow=true;child.userData.origMat=child.material.clone()}
+        });
+        heroGroup.add(model);
+        if(gltf.animations?.length){mixer=new THREE.AnimationMixer(model);mixer.clipAction(gltf.animations[0]).play()}
+        resolve();
+      },
+      xhr=>{const pct=xhr.total?Math.round(xhr.loaded/xhr.total*100):0;const bar=document.getElementById('pbar');if(bar)bar.style.width=pct+'%'},
+      ()=>{buildFallback();resolve()}
+    );
+  });
+}
+
+function buildFallback(){
+  const sk=toon(0xf5c5a3),bd=toon(0x2563eb);const g=new THREE.Group();
+  const torso=new THREE.Mesh(new THREE.CylinderGeometry(.18,.22,.5,14),bd);torso.position.y=1.15;torso.castShadow=true;g.add(torso);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.22,18,14),sk);head.position.y=1.6;head.castShadow=true;g.add(head);
+  [-.1,.1].forEach(x=>{const leg=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.5,10),toon(0x1e293b));leg.position.set(x,.65,0);leg.castShadow=true;g.add(leg);const shoe=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),toon(0x0f172a));shoe.scale.set(1,.6,1.3);shoe.position.set(x,.38,.02);g.add(shoe)});
+  [-1,1].forEach(s=>{const arm=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.4,10),bd);arm.position.set(s*.28,1.15,0);arm.rotation.z=s*.2;arm.castShadow=true;g.add(arm);const hand=new THREE.Mesh(new THREE.SphereGeometry(.05,8,6),sk);hand.position.set(s*.38,.9,0);g.add(hand)});
+  [-.06,.06].forEach(x=>{const eye=new THREE.Mesh(new THREE.SphereGeometry(.035,8,6),toon(0xffffff));eye.position.set(x,1.63,.19);g.add(eye);const pupil=new THREE.Mesh(new THREE.SphereGeometry(.02,6,6),toon(0x111111));pupil.position.set(x,1.63,.22);g.add(pupil)});
+  model=g;heroGroup.add(g);
+}
+
+function setModelColor(hex){if(!model)return;const col=new THREE.Color(hex);
+  model.traverse(ch=>{if(ch.isMesh&&ch.material?.color){const l=ch.material.color.r*.299+ch.material.color.g*.587+ch.material.color.b*.114;if(l>.15&&l<.85)ch.material.color.copy(col)}})
+}
+function resetModelColors(){if(!model)return;model.traverse(ch=>{if(ch.isMesh&&ch.userData.origMat)ch.material.color.copy(ch.userData.origMat.color)})}
+
+/* ══════════════════════════════════════
+   PPE OVERLAYS
+   ══════════════════════════════════════ */
+function buildPPE(){
+  Object.keys(PPE).forEach(k=>{PPE[k].parent?.remove(PPE[k]);delete PPE[k]});
+  const headY=1.65,torsoY=1.2,handY=.6;
+  function mk(key,fn){const g=new THREE.Group();fn(g);g.visible=false;heroGroup.add(g);PPE[key]=g}
+  mk('hat',g=>{g.add(new THREE.Mesh(new THREE.CylinderGeometry(.22,.24,.03,20),toon(0xfdd835)).translateY(headY+.2));g.add(new THREE.Mesh(new THREE.SphereGeometry(.2,16,10,0,Math.PI*2,0,Math.PI/2),toon(0xfdd835)).translateY(headY+.2));g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.02,.04,.2),toon(0xf9a825)),{position:new THREE.Vector3(0,headY+.35,0)}))});
+  mk('glasses',g=>{[-1,1].forEach(s=>{const l=new THREE.Mesh(new THREE.SphereGeometry(.055,10,8),new THREE.MeshToonMaterial({color:0x64b5f6,transparent:true,opacity:.45}));l.position.set(s*.065,headY+.04,.15);l.scale.set(1.1,1,.5);g.add(l);const r=new THREE.Mesh(new THREE.TorusGeometry(.055,.006,8,14),toon(0x37474f));r.position.set(s*.065,headY+.04,.16);g.add(r)});const b=new THREE.Mesh(new THREE.CylinderGeometry(.005,.005,.05,6),toon(0x37474f));b.rotation.z=Math.PI/2;b.position.set(0,headY+.05,.16);g.add(b)});
+  mk('gloves',g=>{[-1,1].forEach(s=>{const gl=new THREE.Mesh(new THREE.SphereGeometry(.055,10,8),toon(0x1565c0));gl.position.set(s*.35,handY,0);g.add(gl);const wr=new THREE.Mesh(new THREE.CylinderGeometry(.04,.05,.08,10),toon(0x1565c0));wr.position.set(s*.35,handY+.06,0);g.add(wr)})});
+  mk('boots',g=>{[-.1,.1].forEach(x=>{const b=new THREE.Mesh(new THREE.SphereGeometry(.08,10,8),toon(0x5d4037));b.scale.set(1,.6,1.4);b.position.set(x,.04,.02);g.add(b);const s=new THREE.Mesh(new THREE.CylinderGeometry(.06,.07,.12,10),toon(0x5d4037));s.position.set(x,.1,0);g.add(s);const sl=new THREE.Mesh(new THREE.BoxGeometry(.1,.025,.14),toon(0x212121));sl.position.set(x,.01,.01);g.add(sl)})});
+  mk('ear',g=>{[-1,1].forEach(s=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.04,12),toon(0xc62828));c.rotation.z=Math.PI/2;c.position.set(s*.18,headY,0);g.add(c)});const band=new THREE.Mesh(new THREE.TorusGeometry(.17,.012,8,18,Math.PI),toon(0x424242));band.position.set(0,headY+.15,0);g.add(band)});
+  mk('mask',g=>{const m=new THREE.Mesh(new THREE.BoxGeometry(.15,.08,.05),toon(0x90caf9));m.position.set(0,headY-.1,.14);g.add(m);for(let i=0;i<3;i++){const p=new THREE.Mesh(new THREE.BoxGeometry(.13,.006,.004),toon(0x64b5f6));p.position.set(0,headY-.12+i*.025,.17);g.add(p)}});
+  mk('apron',g=>{const a=new THREE.Mesh(new THREE.BoxGeometry(.28,.35,.03),toon(0xe3f2fd));a.position.set(0,torsoY,.14);g.add(a);const pk=new THREE.Mesh(new THREE.BoxGeometry(.1,.06,.008),toon(0xbbdefb));pk.position.set(0,torsoY-.08,.16);g.add(pk);const ns=new THREE.Mesh(new THREE.CylinderGeometry(.005,.005,.15,6),toon(0xe3f2fd));ns.position.set(0,torsoY+.28,.12);g.add(ns)});
+  mk('vest',g=>{const v=new THREE.Mesh(new THREE.CylinderGeometry(.18,.17,.28,14,1,true),toon(0xff6f00));v.position.set(0,torsoY+.05,0);g.add(v);[torsoY-.05,torsoY+.08].forEach(y=>{const st=new THREE.Mesh(new THREE.TorusGeometry(.175,.01,8,20),toon(0xeeeeee));st.rotation.x=Math.PI/2;st.position.y=y;g.add(st)})});
+  mk('belt',g=>{const b=new THREE.Mesh(new THREE.TorusGeometry(.16,.025,8,20),toon(0x212121));b.rotation.x=Math.PI/2;b.position.y=torsoY-.2;g.add(b);const bk=new THREE.Mesh(new THREE.BoxGeometry(.04,.04,.03),toon(0xffd600));bk.position.set(0,torsoY-.2,.15);g.add(bk)});
+  mk('flip',g=>{[-.1,.1].forEach(x=>{const s=new THREE.Mesh(new THREE.BoxGeometry(.08,.015,.15),toon(0xf06292));s.position.set(x,.01,.01);g.add(s);const st=new THREE.Mesh(new THREE.TorusGeometry(.03,.005,6,10,Math.PI),toon(0xad1457));st.position.set(x,.025,.04);g.add(st)})});
+}
+
+/* ══════════════════════════════════════
+   HAZARD PROPS
+   ══════════════════════════════════════ */
+const hzG=new THREE.Group();hzG.position.set(-2.5,0,.3);scene.add(hzG);
+function setHz(t){
+  while(hzG.children.length)hzG.remove(hzG.children[0]);if(!t)return;
+  if(t==='spill'){const p=new THREE.Mesh(new THREE.CylinderGeometry(.8,.7,.04,20),new THREE.MeshToonMaterial({color:0x29b6f6,transparent:true,opacity:.6}));p.position.y=.03;hzG.add(p);for(let i=0;i<3;i++){const r=new THREE.Mesh(new THREE.TorusGeometry(.2+i*.2,.01,6,18),new THREE.MeshToonMaterial({color:0x81d4fa,transparent:true,opacity:.4}));r.rotation.x=Math.PI/2;r.position.y=.05;hzG.add(r)}}
+  if(t==='boxes'){[[0,.3,0],[.25,.9,0],[-.4,.3,.4]].forEach((p,i)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(.55,.55,.55),toon([0xbf8040,0xc9915e,0xa06b30][i%3]));b.position.set(...p);b.rotation.y=i*.3;b.castShadow=true;hzG.add(b);const tp=new THREE.Mesh(new THREE.BoxGeometry(.45,.03,.008),toon(0xfdd835));tp.position.set(p[0],p[1]+.08,p[2]+.28);hzG.add(tp)})}
+  if(t==='spark'){const pnl=new THREE.Mesh(new THREE.BoxGeometry(.7,1.1,.28),toon(0x78909c));pnl.position.set(0,.55,0);pnl.castShadow=true;hzG.add(pnl);const dr=new THREE.Mesh(new THREE.BoxGeometry(.55,.85,.04),toon(0x607d8b));dr.position.set(0,.55,.16);hzG.add(dr);for(let i=0;i<5;i++){const s=new THREE.Mesh(new THREE.ConeGeometry(.05,.25,4),toon(0xffeb3b));s.position.set(Math.cos(i)*.3,1.2+Math.sin(i)*.1,.2);s.rotation.z=Math.random()*2;hzG.add(s)}}
+  if(t==='bio'){for(let i=0;i<3;i++){const a=i*2.1;const br=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.4,10),toon(0x66bb6a));br.position.set(Math.cos(a)*.4,.2,Math.sin(a)*.35);br.castShadow=true;hzG.add(br);const ld=new THREE.Mesh(new THREE.CylinderGeometry(.21,.21,.03,10),toon(0x43a047));ld.position.set(Math.cos(a)*.4,.41,Math.sin(a)*.35);hzG.add(ld)}}
+  if(t==='noise'){const m=new THREE.Mesh(new THREE.BoxGeometry(.6,.8,.45),toon(0x546e7a));m.position.set(0,.4,0);m.castShadow=true;hzG.add(m);for(let i=0;i<3;i++){const w=new THREE.Mesh(new THREE.TorusGeometry(.2+i*.2,.02,8,16,Math.PI*.8),new THREE.MeshToonMaterial({color:0xef5350,transparent:true,opacity:.6-i*.12}));w.position.set(0,.5,.3+i*.1);hzG.add(w)}}
+}
+
+/* ══════════════════════════════════════
+   RENDER LOOP
+   ══════════════════════════════════════ */
+let animBounce=0,animShake=0;
+const clock=new THREE.Clock();
+function fit(){const w=stageEl.clientWidth,h=stageEl.clientHeight;renderer.setSize(w,h);renderer.setPixelRatio(Math.min(devicePixelRatio,2));cam.aspect=w/h;cam.updateProjectionMatrix()}
+new ResizeObserver(fit).observe(stageEl);fit();
+
+(function loop(){
+  requestAnimationFrame(loop);
+  const dt=clock.getDelta(),t=clock.elapsedTime;
+  controls.update();
+  if(mixer)mixer.update(dt);
+  heroGroup.position.y=animBounce>0?Math.abs(Math.sin(animBounce*9))*.4:Math.sin(t*1.8)*.015;
+  heroGroup.rotation.y=Math.sin(t*.6)*.1+(animShake>0?Math.sin(t*45)*.2:0);
+  if(animBounce>0)animBounce-=dt;
+  if(animShake>0)animShake-=dt;
+  ring.material.opacity=.25+Math.sin(t*2)*.15;
+  hzG.rotation.y=t*.2;
+  renderer.render(scene,cam);
+})();
+
+/* ══════════════════════════════════════
+   GAME LOGIC
+   ══════════════════════════════════════ */
+const S={};const $=h=>P.innerHTML=h;
+let playerName='',playerCompany='';
+
+const shieldSVG=`<div class="shield"><svg viewBox="0 0 80 92" fill="none"><path d="M40 2L6 20v28c0 22 14 36 34 42 20-6 34-20 34-42V20L40 2z" fill="url(#sg)"/><defs><linearGradient id="sg" x1="0" y1="0" x2="80" y2="92"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient></defs></svg><span class="shield-text">SL</span></div>`;
+
+const hud=()=>`<div class="hud"><span class="hearts">${'❤️'.repeat(S.h)+'🖤'.repeat(3-S.h)}</span><span class="tag">${ROLES[S.r].n}</span><span class="score">⭐ ${S.s}</span></div><div class="player-bar"><span class="dot"></span>${playerName} — ${playerCompany}</div>`;
+function setWorn(){Object.keys(PPE).forEach(k=>PPE[k].visible=S.w.has(k))}
+
+/* ── Welcome screen ── */
+window.welcome=()=>{
+  setHz();resetModelColors();Object.keys(PPE).forEach(k=>PPE[k].visible=false);
+  $(`<div style="text-align:center;padding-top:10px"><div class="sub">Every Role Makes a Difference</div><h1>SAFETY<br>LEGENDS</h1><p style="margin-top:8px">Choose your role. Gear up. Make safe choices.<br>Your mission starts here.</p><div class="chips"><span class="chip">3–4 min missions</span><span class="chip">4 hazard encounters</span><span class="chip">Phone · Tablet · PC</span></div></div><div class="login-card"><h3>Player Login</h3><label>Your Name</label><input class="inp" id="pname" placeholder="Enter your name" maxlength="60"><label>Company / Department</label><input class="inp" id="pcomp" placeholder="Enter your company or department" maxlength="80"></div><button class="btn" onclick="register()">LOG IN &amp; CONTINUE →</button>`);
+  setTimeout(()=>document.getElementById('pname')?.focus(),100);
+};
+
+window.register=()=>{
+  const n=document.getElementById('pname')?.value.trim();
+  const c=document.getElementById('pcomp')?.value.trim();
+  if(!n){document.getElementById('pname')?.focus();return}
+  playerName=n;playerCompany=c||'—';animBounce=.8;home();
+};
+
+/* ── Role select ── */
+window.home=()=>{
+  setHz();resetModelColors();setWorn();
+  $(`<div style="text-align:center">${shieldSVG}<div class="sub">Your Mission Awaits</div><h1 style="font-size:1.3rem">SAFETY LEGENDS</h1><p>Welcome, <b style="color:var(--ink)">${playerName}</b>!<br>Every role can be a legend. Which role will you take?</p></div>`+
+  Object.keys(ROLES).map(k=>`<button class="role-card" onclick="pick('${k}')"><span class="icon" style="background:${ROLES[k].bg}">${ROLES[k].e}</span><span><b>${ROLES[k].n}</b><small>${ROLES[k].d.split('.')[0]}.</small></span></button>`).join(''));
+};
+
+/* ── Pick role → briefing ── */
+window.pick=k=>{
+  Object.assign(S,{r:k,h:3,s:0,i:0,w:new Set(),q:ROLES[k].sc});
+  resetModelColors();setModelColor(ROLES[k].c);setWorn();setHz();
+  $(`${hud()}<div class="sub" style="margin-top:4px">Mission Briefing</div><h2>${ROLES[k].e} ${ROLES[k].n}</h2><p style="color:var(--ink)">${ROLES[k].d}</p><p>Before you start, think: what hazards could you face on this job?</p><button class="btn" onclick="dress()">Gear Up for the Job</button><button class="btn sec" onclick="home()">← Choose Another Role</button>`);
+};
+
+/* ── PPE dressing ── */
+window.dress=(msg)=>{
+  $(`${hud()}<div class="sub">Equipment Check</div><h2>Select Your PPE</h2><p>Tap items to put them on or take them off. Wear only what the job needs.</p><div class="grid">`+
+  Object.keys(ITEMS).map(k=>`<button class="it ${S.w.has(k)?'on':''}" onclick="tog('${k}')" aria-pressed="${S.w.has(k)}"><span class="e">${ITEMS[k][0]}</span>${ITEMS[k][1]}</button>`).join('')+
+  `</div>${msg||''}<button class="btn" onclick="check()">Start My Shift →</button>`);
+};
+window.tog=k=>{S.w.has(k)?S.w.delete(k):S.w.add(k);setWorn();dress()};
+window.check=()=>{
+  const n=ROLES[S.r].need,miss=n.filter(k=>!S.w.has(k)),extra=[...S.w].filter(k=>!n.includes(k));
+  if(!miss.length&&!extra.length){S.s+=100;animBounce=.8;return ask()}
+  let m='<div class="msg">';
+  if(miss.length)m+=`<b class="badc">⚠ Missing:</b> ${miss.map(k=>ITEMS[k][1]).join(', ')}.<br>`;
+  if(extra.length)m+=`<b class="badc">✕ Not needed / unsafe:</b> ${extra.map(k=>ITEMS[k][1]).join(', ')}.`;
+  animShake=.6;dress(m+'</div>');
+};
+
+/* ── Hazard scenarios ── */
+window.ask=()=>{
+  if(S.i>=S.q.length)return end();
+  const q=S.q[S.i];setHz(q[0]);
+  S.o=q[2].map((t,j)=>({t,ok:j===0})).sort(()=>Math.random()-.5);
+  $(`${hud()}<span class="hz-tag">⚠ Hazard ${S.i+1} of ${S.q.length}</span><h2 style="margin-top:10px">${q[1]}</h2><p>What do you do?</p>`+
+  S.o.map((o,j)=>`<button class="opt-btn" onclick="ans(${j})">${o.t}</button>`).join(''));
+};
+window.ans=j=>{
+  const q=S.q[S.i],o=S.o[j];let h;
+  if(o.ok){S.s+=150;animBounce=1;h=`<h2 class="good">✅ Safe Choice! +150</h2>`}
+  else{S.h--;animShake=.8;h=`<h2 class="badc">❌ Unsafe Choice</h2><p><b style="color:var(--ink)">Best action:</b> ${q[2][0]}</p>`}
+  $(`${hud()}${h}<div class="msg">💡 <b>Safety tip:</b> ${q[3]}</div><button class="btn" onclick="S.i++;S.h>0?ask():end()">${S.h>0&&S.i<S.q.length-1?'Next Hazard →':'Complete Shift →'}</button>`);
+};
+
+/* ── End screen ── */
+window.end=()=>{
+  setHz();const win=S.h>0,top=S.h===3;
+  $(`${hud()}<div style="text-align:center"><p class="big">${top?'🏆':win?'🎖️':'🚑'}</p><h1 style="font-size:1.8rem">${top?'SAFETY LEGEND!':win?'SHIFT COMPLETE':'SHIFT STOPPED'}</h1><div class="end-badge">${playerName} — ${playerCompany}</div><p style="color:var(--ink)">${top?'Perfect run! You geared up correctly and made every safe choice.':win?'You finished the shift, but some choices were risky. Review the tips and try for a perfect run.':'Too many unsafe choices. In real life, this is how people get hurt. Learn from the tips and try again.'}</p><div class="final-score">${S.s}</div><p style="font-size:.85rem">FINAL SCORE</p></div><button class="btn" onclick="pick(S.r)">Replay as ${ROLES[S.r].n}</button><button class="btn sec" onclick="home()">Choose Another Role</button><button class="btn sec" onclick="welcome()">Change Player</button>`);
+  animBounce=top?2:0;
+};
+
+/* ── BOOT ── */
+loadModel().then(()=>{document.getElementById('loader')?.remove();buildPPE();welcome()}).catch(()=>{document.getElementById('loader')?.remove();buildPPE();welcome()});
+</script></body></html>
